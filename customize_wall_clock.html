@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>自定义挂钟面板</title>
+	<style>
+	  #canvas
+		{
+			border-radius:200px;
+			background-image:url(./img/a.jpg);
+			
+			margin:0 30px;
+			border:solid 1px blue;
+			
+			
+
+		}
+		.canvas_wrapper{
+			clear:both;
+			position:relative;
+
+		}
+		.canvas_wrapper .indicator{
+			position:absolute;
+			top:-5px;
+			left:470px;
+		}
+		.canvas_wrapper p{
+		
+			font-size:30px;
+			font-weight:bolder;
+		}
+		.canvas_wrapper input{
+		
+			display:none;
+		}
+		.canvas_wrapper label{
+			border:solid 1px #333;
+		
+			display:inline-block;
+			padding:5px;
+			font-size:30px;
+			box-shadow: 1px 1px ;
+		}
+		.canvas_wrapper span{
+		
+			font-size:30px;
+		}
+		.optional_backdrop{
+			float:left;
+			border-bottom:dashed 1px #888888;
+		}
+		.optional_backdrop li{
+			list-style:none;
+			float:left;
+		}
+	</style>
+</head>
+<body>
+	
+	<ul class="optional_backdrop">
+		<li><img src="./img/1.jpg" alt="" width="320px" height="220px"></li>
+		<li><img src="./img/2.jpg" alt="" width="320px" height="220px"></li>
+		<li><img src="./img/3.jpg" alt="" width="320px" height="220px"></li>
+		<li><img src="./img/4.jpg" alt="" width="320px" height="220px"></li>
+		
+	</ul>
+	<div class="canvas_wrapper">
+		<canvas id="canvas" width="400" height="400"></canvas>
+		<div class="indicator">
+		<p>您可以通过点击以上图片来更换表盘背景,也可以用本地文件。</p>
+		<label for="upload">点我选择本地图片</label>
+		<span id="tip"></span>
+		<input type="file" id="upload">
+		</div>
+	<div>
+	
+	<script>
+	    var canvas=document.getElementById("canvas");
+		var ctx=document.getElementById("canvas").getContext("2d");
+		var upload=document.getElementById("upload");
+		var tip=document.getElementById("tip");
+		ctx.lineCap="round";
+
+		function clock(){
+          	var now=new Date();
+	        ctx.save();
+	        ctx.clearRect(0,0,400,400);
+			ctx.translate(200,200);
+
+			ctx.beginPath();
+			ctx.arc(0,0,200,0,Math.PI*2,false);
+			ctx.clip();
+			
+			ctx.rotate(-Math.PI/2);
+
+			//Hour mark
+			
+			ctx.save();
+			
+			ctx.strokeStyle="yellow";
+			ctx.lineWidth=5;
+			for(i=0;i<12;i++)
+			{
+				ctx.beginPath();
+				ctx.rotate(Math.PI/6);
+				ctx.moveTo(180,0);
+				ctx.lineTo(190,0);
+				ctx.stroke();
+			}
+			ctx.restore();
+			//Minute mark
+			ctx.save();
+			ctx.strokeStyle="blue";
+			ctx.lineWidth=3;
+			for(i=0;i<60;i++)
+			{
+				
+				if(i%5!=0)
+				{
+					ctx.beginPath();
+					ctx.moveTo(170,0);
+					ctx.lineTo(190,0);
+					ctx.stroke();
+			   }
+			   ctx.rotate(Math.PI/30);
+			}
+			ctx.restore();
+	
+			var hr=now.getHours();
+			var min=now.getMinutes();
+			var sec=now.getSeconds();
+			hr = hr >=12 ?hr-12 :hr;
+			//write hour
+			ctx.save();
+			ctx.lineWidth=8;
+			ctx.strokeStyle="red";
+			ctx.rotate(hr*Math.PI/6+min*Math.PI/360+sec*Math.PI/21600);
+			ctx.beginPath();
+			ctx.moveTo(-10,0);
+			ctx.lineTo(100,0);
+			ctx.stroke();
+			ctx.restore();
+			//write minute
+			ctx.save();
+			ctx.lineWidth=4;
+			ctx.strokeStyle="purple";
+			ctx.rotate(min*Math.PI/30+sec*Math.PI/1800);
+			ctx.beginPath();
+			ctx.moveTo(-20,0);
+			ctx.lineTo(150,0);
+			ctx.stroke();
+			ctx.restore();
+
+			//write second
+			ctx.save();
+			ctx.lineWidth=2;
+			ctx.strokeStyle="orange";
+			ctx.rotate(sec*Math.PI/30);
+			ctx.beginPath();
+			ctx.moveTo(-25,0);
+			ctx.lineTo(160,0);
+			ctx.stroke();
+			ctx.restore();
+            
+            ctx.restore();
+        
+
+			window.requestAnimationFrame(clock);
+		}
+	
+		clock();
+
+        function change_background(){
+			var back_imgs=document.getElementsByTagName("img");
+			for(var i=0;i<4;i++)
+			{
+				(function(index){
+				var  a=back_imgs[index];
+				a.addEventListener("click",function(){
+					canvas.style.backgroundImage="url("+a.src+")";
+					
+					
+				});
+					a.addEventListener("touch",function(e){
+					e.preventdefault();
+					canvas.style.backgroundImage="url("+a.src+")";
+					
+				});
+				})(i);
+			}
+
+
+			 var file=null;
+       
+	        var reader = new FileReader();
+			upload.addEventListener("change",function(){
+			var fileList=this.files;
+			file=fileList[0];
+			tip.innerHTML="已选择文件"+file.name;
+			reader.readAsDataURL(file);
+	        reader.onload=function(){
+		      canvas.style.backgroundImage="url("+reader.result+")";
+	        }
+			})
+		}
+
+		change_background();
+       
+	</script>
+	
+</body>
+</html>
